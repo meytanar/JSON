@@ -8,30 +8,42 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
+    @IBOutlet weak var tableView: UITableView!
+    var titleDizi = [String]();
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let url = "https://jsonplaceholder.typicode.com/todos/1"
+        let url = "https://jsonplaceholder.typicode.com/todos"
         
         if let url = URL(string: url){
             let request = URLRequest(url: url)
            
             URLSession.shared.dataTask(with: request){ (data, response, err) in
-                let Json = JSONDecoder()
+                
                 do {
-                    let newJson = try Json.decode(JSONDataText.self, from: data!)
-                    DispatchQueue.main.sync {
-                        print(newJson.title)
+                    let newJson = try JSONDecoder().decode([JSONDataText].self, from: data!)
+                 
+                    for post in newJson {
+                            DispatchQueue.main.sync {
+                                self.titleDizi.append(post.title)
+                                
+                            }
+                        self.tableView.reloadData()
                     }
                 } catch {
-                    print(error.localizedDescription)
                 }
             }.resume()
         }
     }
-
-
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return titleDizi.count
+    }
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = UITableViewCell()
+        cell.textLabel?.text = titleDizi[indexPath.row]
+        return cell
+    }
 }
 
